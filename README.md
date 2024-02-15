@@ -34,7 +34,7 @@ IDE - Para o desenvolvimento utilizei o Vscode (Você pode usar outra) assim ins
 
 Agora basta acessar o Spring Boot Dashboard e rodar o projeto, apenas estarão disponiveis rotas e um banco H2 com alguns dados inseridos.
 
-- Banco H2 : [http://localhost:8081/](http://localhost:8080/h2)
+- Banco H2 : [http://localhost:8080/h2](http://localhost:8080/h2)
 - Spring server : [http://localhost:8080/](http://localhost:8080)
 
 Será possivel acessar o banco de dados usando a senha:
