@@ -62,8 +62,6 @@ Acesse o diretorio
 ```
 Crie o arquivo .env na pasta Frontend e dentro coloque a seguinte variavel de ambiente
 
-## Variaveis de ambiente
-
 
 `VUE_APP_API_URL=http://localhost:8080`
 
