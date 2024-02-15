@@ -1,8 +1,27 @@
 <template>
   <div>
-    <user-list v-if="!showAddForm && !loading" :users="users" @show-add-user-form="showAddUserForm" />
-    <add-user-form v-if="showAddForm" @cancel="hideAddUserForm" @user-added="handleUserAdded"/>
-
+    
+    <user-list 
+      v-if="!showAddForm && !loading && !showUserDetailsFlag" 
+      :users="users" 
+      @show-add-user-form="showAddUserForm" 
+      @user-deleted="handleUserDeleted" 
+      @edit-user="editUser"
+      @user-selected="showUserDetails"
+    />
+    <add-user-form 
+      v-if="showAddForm || editingUser" 
+      @cancel="cancelAddUser" 
+      @user-added="handleUserAdded" 
+      @user-updated="handleUserUpdated"
+      :editing="editingUser" 
+      :user-data="userDataToEdit" 
+    />
+    <user-details 
+      v-if="showUserDetailsFlag" 
+      :user="selectedUser" 
+      @cancel="cancelShowUserDetails" 
+    />
     <div v-if="loading" class="loading">
       Carregando...
     </div>
@@ -13,18 +32,24 @@
 import axios from 'axios';
 import UserList from './UserList.vue';
 import AddUserForm from './AddUserForm.vue';
+import UserDetails from './UserDetails.vue';
 
 export default {
   name: 'UserManagement',
   components: {
     UserList,
-    AddUserForm
+    AddUserForm,
+    UserDetails
   },
   data() {
     return {
       users: [], 
       showAddForm: false,
-      loading: false 
+      loading: false,
+      editingUser: false,
+      userDataToEdit: null,
+      showUserDetailsFlag: false,
+      selectedUser: null
     };
   },
   methods: {
@@ -41,17 +66,39 @@ export default {
       }
     },   
     showAddUserForm() {
-   
       this.showAddForm = true;
     },
-    hideAddUserForm() {
+    cancelAddUser() {
       this.showAddForm = false;
+      this.editingUser = false; 
+      this.userDataToEdit = null; 
     },
     handleUserAdded(newUser) {
       this.users.push(newUser);
-
-
       this.showAddForm = false;
+      this.editingUser = false;
+      this.userDataToEdit = null; 
+    },
+    handleUserDeleted(userId) {
+      this.users = this.users.filter(user => user.id !== userId);
+    },
+    handleUserUpdated() {
+      this.getUsers();
+      this.showAddForm = false;
+      this.editingUser = false;
+    },
+    editUser(userData) {
+      this.userDataToEdit = userData;
+      this.editingUser = true;
+      this.showAddForm = true;
+    },
+    showUserDetails(user) {
+      this.showUserDetailsFlag = true;
+      this.selectedUser = user;
+    },
+    cancelShowUserDetails() {
+      this.showUserDetailsFlag = false;
+      this.selectedUser = null;
     }
   },
   mounted() {
