@@ -1,6 +1,7 @@
 package com.example.gestao.gestao.controller;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,12 +14,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.gestao.gestao.entity.Gender;
 import com.example.gestao.gestao.entity.User;
 import com.example.gestao.gestao.exception.EmailDuplicateException;
-import com.example.gestao.gestao.repository.GenderRepository;
-import com.example.gestao.gestao.repository.UserRepository;
-
+import com.example.gestao.gestao.exception.UserNotFoundException;
+import com.example.gestao.gestao.service.UserService;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,99 +27,82 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/user")
 public class UserController {
 
-     @Autowired
-    private UserRepository userRepository;
 
     @Autowired
-    private GenderRepository genderRepository; 
+    private UserService userService;
 
     @PostMapping
     public ResponseEntity<?> createUser(@Validated User user) { //Deixei no padrão de recebimento de solicitações do spring (não aceita JSON)
-          try{
-            User existingUser = userRepository.findByEmail(user.getEmail());
-            if (existingUser != null) {
-                // E-mail já em uso, envie uma mensagem ao usuário ou lance uma exceção
-                throw new EmailDuplicateException("Este e-mail já está em uso. Por favor, escolha outro.");
-            }else{
-                Gender gender = genderRepository.findById(user.getGenderId()).orElse(null);
-                if (gender != null){
-                    user.setGender(gender);
-
-                    User savedUser = userRepository.save(user);    
-                    
-                    return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
-
-                }else{
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad Request");
-                }
-            }  
+        try {
+            User createdUser = userService.createUser(user);
+            
+            if (createdUser != null) {
+                return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao criar usuário");
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Usuário inválido");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.badRequest().body("Gênero não encontrado");
         } catch (EmailDuplicateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
-        }catch(Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error" + e.getMessage()); 
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor");
         }
     }
 
+
     @GetMapping
-    public ResponseEntity<?> getUsers() { //Deixei no padrão de recebimento de solicitações do spring (não aceita JSON)
+    public ResponseEntity<?> getUsers() {
         try {
-            List<User> users = userRepository.findAll();
-            return ResponseEntity.status(HttpStatus.OK).body(users);
+            List<User> users = userService.getUsers();
+            return ResponseEntity.ok(users);
+        } catch(UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch(Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao recuperar usuários: " + e.getMessage()); 
         }
-        
     }
     
-    @GetMapping("{id}")
+    
+    @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable("id") long id) {
-        try{
-            User user = userRepository.findById(id).orElse(null);; 
-            if(user != null){
-                return ResponseEntity.ok(user);
-             }else{
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not Found");
-             }
-        }catch(Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error" + e.getMessage()); 
+        try {
+            User user = userService.getUserById(id);
+            return ResponseEntity.ok(user);
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor");
         }
-        
     }
+    
+
     @PutMapping
-    public ResponseEntity<?> updateUser(@Validated User user) {
-        try{
-            User userExist = userRepository.findById(user.getId()).orElse(null);
-
-            if (userExist != null) {
-                Gender gender = genderRepository.findById(user.getGenderId()).orElse(null);
-                if (gender != null){
-                    user.setGender(gender);
-
-                    User savedUser = userRepository.save(user);    
-                    
-                    return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
-                }else{
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad Request");
-                }
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not Found"); 
-            }
-            
-        }catch(Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error" + e.getMessage()); 
+    public ResponseEntity<?> updateUser(User user) {
+        try {
+            User updatedUser = userService.updateUser(user);
+            return ResponseEntity.ok(updatedUser);
+        } catch(UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch(NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch(Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor: " + e.getMessage()); 
         }
     }
 
 
     @DeleteMapping("{id}")
     public ResponseEntity<?> deleteUserById(@PathVariable("id") long id) {
-        try{
-            userRepository.deleteById(id);
-            return ResponseEntity.status(HttpStatus.OK).body("Deleted Successfully!");
-       }catch(Exception e){
-           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error" + e.getMessage()); 
-       }
+        try {
+            userService.deleteUserById(id);
+            return ResponseEntity.ok("Deletado com sucesso!");
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error: " + e.getMessage());
+        }
     }
-    
-
 }

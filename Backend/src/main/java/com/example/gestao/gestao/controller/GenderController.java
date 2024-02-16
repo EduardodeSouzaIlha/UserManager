@@ -22,7 +22,7 @@ public class GenderController {
     private GenderRepository genderRepository;
 
     @GetMapping
-    public ResponseEntity<?> getGender() { //Deixei no padrão de recebimento de solicitações do spring (não aceita JSON)
+    public ResponseEntity<?> getGender() { //Fiz a criação do genero diretamente pelo controlador e não criei um service
         try {
             List<Gender> genders = genderRepository.findAll();
             return ResponseEntity.status(HttpStatus.OK).body(genders);
