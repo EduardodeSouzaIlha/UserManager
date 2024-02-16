@@ -1,7 +1,10 @@
 <template>
   <div class="user-details">
     <h2>Detalhes do Usuário</h2>
-    <div class="details">
+    <div v-if="user === null" class="loading">
+      Carregando...
+    </div>
+    <div v-else class="details">
       <p><strong>ID:</strong> {{ user.id }}</p>
       <p><strong>Nome:</strong> {{ user.name }}</p>
       <p><strong>Email:</strong> {{ user.email }}</p>
@@ -13,18 +16,39 @@
   </div>
 </template>
 
+
 <script>
+import axios from 'axios';
+
 export default {
   props: {
-    user: {
-      type: Object,
+    id:{
+      type: Number,
       required: true
     }
+  },
+  data() {
+    return {
+      user: null
+    };
   },
   methods: {
     cancel() {
       this.$emit('cancel');
-    }
+    },
+   async getUser() {
+     try{
+      const url = process.env.VUE_APP_API_URL + `/user/${this.id}`;
+      const response = await axios.get(url)
+      this.user = response.data;
+        console.log('Usuário carregado:', this.users);
+      } catch (error) {
+        console.error('Erro ao carregar usuário:', error);
+      }
+    },
+  },
+  mounted(){
+    this.getUser();
   }
 };
 </script>

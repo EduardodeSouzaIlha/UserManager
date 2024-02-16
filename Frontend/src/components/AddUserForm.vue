@@ -9,9 +9,15 @@
       <label for="bio">Biografia:</label>
       <textarea rows="10" id="bio" v-model="formData.bio" required ></textarea>
       <label for="gender">Gênero:</label>
-      <select id="gender" v-model="formData.genderId" required>
-        <option v-for="gender in genders" :key="gender.id" :value="gender.id">{{ gender.gender }}</option>
+      <!-- Os select a baixo estão repetidos porque tive problemas ao marcar no caso de atualizar o user -->
+      <select id="gender" v-model="formData.genderId" v-if="editing" required>
+        <option selected :key="this.selected.id" :value="this.selected.id">{{this.selected.gender}}</option>
+        <option v-for="gender in filter" :key="gender.id" :value="gender.id"> {{ gender.gender }}</option>
       </select>
+      <select id="gender" v-model="formData.genderId" v-else required>
+        <option v-for="gender in genders" :key="gender.id" :value="gender.id"> {{ gender.gender }}</option>
+      </select>
+
       <label for="confirmed">Confirmado:</label>
       <div class="radio-buttons">
         <label><input type="radio" value="true" v-model="formData.confirmed"> Sim</label>
@@ -44,7 +50,9 @@ export default {
         confirmed: false
       },
       genders: [],
-      errorMessage: ''
+      errorMessage: '', 
+      filter: [], 
+      selected: {}
     };
   },
   methods: {
@@ -99,7 +107,12 @@ export default {
       try {
         const response = await axios.get(process.env.VUE_APP_API_URL + '/gender');
         this.genders = response.data;
-        console.log('Genders carregados:', this.genders);
+        if(this.editing){
+          console.log('Genders carregados:', this.genders);
+           this.selected = this.genders.filter(g => g.id == this.userData.gender.id)[0]
+           this.filter = this.genders.filter(g => g.id != this.userData.gender.id)
+           this.formData.genderId  = this.selected.id;
+        }
       } catch (error) {
         this.errorMessage = 'Erro ao carregar gêneros: ' + error.message;
         console.error('Erro ao carregar Genders:', error);
@@ -107,9 +120,11 @@ export default {
     }
   },
   mounted() {
+    console.log(this.userData)
     this.getGenders();
     if (this.editing && this.userData) {
       this.formData = { ...this.userData };
+      
     }
     
   }

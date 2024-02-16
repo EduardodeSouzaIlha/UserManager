@@ -19,7 +19,7 @@
     />
     <user-details 
       v-if="showUserDetailsFlag" 
-      :user="selectedUser" 
+      :id="selectedUser" 
       @cancel="cancelShowUserDetails" 
     />
     <div v-if="loading" class="loading">
@@ -94,7 +94,7 @@ export default {
     },
     showUserDetails(user) {
       this.showUserDetailsFlag = true;
-      this.selectedUser = user;
+      this.selectedUser = user.id;
     },
     cancelShowUserDetails() {
       this.showUserDetailsFlag = false;
