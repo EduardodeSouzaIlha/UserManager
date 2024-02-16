@@ -32,14 +32,17 @@ IDE - Para o desenvolvimento utilizei o Vscode (Você pode usar outra) assim ins
 - Spring Boot Tools (Se ativa ao editar aquivos .java)
 - Spring Initilizr Java Support (Criador de projetos Spring CTRL + P)
 
-Agora basta acessar o Spring Boot Dashboard e rodar o projeto, apenas estarão disponiveis rotas e um banco H2 com alguns dados inseridos.
+Agora basta acessar o Spring Boot Dashboard e rodar o projeto (para rodar o backend é necessário abrir a pasta do backend no vscode pois se tiver outros projetos além do spring, pode ser que o spring deshboard não encontre o projeto), apenas estarão disponiveis rotas e um banco H2 com alguns dados inseridos.
 
 - Banco H2 : [http://localhost:8080/h2](http://localhost:8080/h2)
 - Spring server : [http://localhost:8080/](http://localhost:8080)
 
-Será possivel acessar o banco de dados usando a senha:
+Será possivel acessar o banco de dados usando os seguintes dados:
 
-- password
+- user: sa
+- password: password
+
+lembrando que a configuração do banco se encontra no arquivo aplication.properties
 
 ### Scripts SQL
 
@@ -78,19 +81,10 @@ Logo o projeto vai estar disponivel em
 [http://localhost:8081/](http://localhost:8081/)
 
 
+## Sobre a aplicação
 
-## Difereças
+Foram aplicadas validações em todos os campos, também não é permitido cadastrar emails igual ou alterar os campos via html, pois os dados serão interceptados pelo backend recebendo um 404
 
-JDK (Java Development Kit):
 
-O JDK é um conjunto de ferramentas de desenvolvimento completo para criar aplicativos Java.
-Inclui o JRE, o compilador Java (javac), as bibliotecas Java (APIs) e várias ferramentas de desenvolvimento e depuração.
-É usado por desenvolvedores para escrever, compilar, depurar e executar aplicativos Java.
-
-JRE (Java Runtime Environment):
-
-O JRE é uma parte do JDK que fornece o ambiente de tempo de execução para executar aplicativos Java.
-Inclui a máquina virtual Java (JVM) e as bibliotecas Java padrão (APIs) necessárias para executar aplicativos Java.
-É usado pelos usuários finais para executar aplicativos Java sem a necessidade de instalar o JDK completo.
 
 
