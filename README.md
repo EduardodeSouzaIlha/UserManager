@@ -83,7 +83,7 @@ Logo o projeto vai estar disponivel em
 
 ## Sobre a aplicação
 
-Foram aplicadas validações em todos os campos, também não é permitido cadastrar emails igual ou alterar os campos via html, pois os dados serão interceptados pelo backend recebendo um 404
+Foram aplicadas validações em todos os campos, também não é permitido cadastrar emails igual ou alterar os campos via html, pois os dados serão interceptados pelo backend recebendo um 404. O projeto conta com duas tabelas no banco de dados user_entity e gender.
 
 ## Link do video de apresentação 
 [Video de apresentação][https://youtu.be/yYM-hFNDEKA]
